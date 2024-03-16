@@ -11,6 +11,7 @@
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js
 // @require      https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @updateURL    https://raw.githubusercontent.com/D4Enjoyer/poe-trade-misc-script/main/poe-trade-misc-script.user.js
+// @downloadURL  https://raw.githubusercontent.com/D4Enjoyer/poe-trade-misc-script/main/poe-trade-misc-script.user.js
 // ==/UserScript==
 
 /* 
@@ -125,50 +126,50 @@ exchange.search-clearer.js
 
 // Function to clear the search bar
 function clearSearchBar() {
-	try {
-		const searchBar = $(".search-select.form-control.text");
-		if (searchBar.length) {
-			searchBar.val("");
-			searchBar[0].dispatchEvent(new Event("input", { bubbles: true }));
-			// console.log("Search bar cleared.");
-		}
-	} catch (error) {
-		console.error("Error occurred while clearing searchbar:", error);
-	}
+    try {
+        const searchBar = $(".search-select.form-control.text");
+        if (searchBar.length) {
+            searchBar.val("");
+            searchBar[0].dispatchEvent(new Event("input", { bubbles: true }));
+            // console.log("Search bar cleared.");
+        }
+    } catch (error) {
+        console.error("Error occurred while clearing searchbar:", error);
+    }
 }
 
 // Function to check if the search bar contains text
 function shouldClearSearchBar() {
-	try {
-		var searchBar = $(".search-select.form-control.text");
-		var searchBarContainsText = searchBar.length && searchBar.val().trim() !== "";
-		// console.log("Search bar contains text:", searchBarContainsText);
-		return searchBarContainsText;
-	} catch (error) {
-		console.error("Error occurred while checking if the search bar contains text:", error);
-		return false;
-	}
+    try {
+        var searchBar = $(".search-select.form-control.text");
+        var searchBarContainsText = searchBar.length && searchBar.val().trim() !== "";
+        // console.log("Search bar contains text:", searchBarContainsText);
+        return searchBarContainsText;
+    } catch (error) {
+        console.error("Error occurred while checking if the search bar contains text:", error);
+        return false;
+    }
 }
 
 // Event handler for clicking on exchange items
 function handleExchangeItemClick(event) {
-	try {
-		if ($(event.target).closest(".exchange-filter-item").length && shouldClearSearchBar()) {
-			// console.log("Clicked on .exchange-filter-item");
-			clearSearchBar();
-		}
-	} catch (error) {
-		console.error("Error occurred in handleExchangeItemClick:", error);
-	}
+    try {
+        if ($(event.target).closest(".exchange-filter-item").length && shouldClearSearchBar()) {
+            // console.log("Clicked on .exchange-filter-item");
+            clearSearchBar();
+        }
+    } catch (error) {
+        console.error("Error occurred in handleExchangeItemClick:", error);
+    }
 }
 
 function exchangeSearchClearerMain() {
-	try {
-		$(".search-advanced-items.exchange").on("click", handleExchangeItemClick);
-		// console.log("Searchbar found, click event listeners added");
-	} catch (error) {
-		console.error("Error occurred in exchangeSearchClearerMain:", error);
-	}
+    try {
+        $(".search-advanced-items.exchange").on("click", handleExchangeItemClick);
+        // console.log("Searchbar found, click event listeners added");
+    } catch (error) {
+        console.error("Error occurred in exchangeSearchClearerMain:", error);
+    }
 }
 
 /* 
@@ -272,47 +273,41 @@ fuzzy-search.js
 
 // Function to handle the main fuzzy search logic
 function handleFuzzySearch(e) {
-	try {
-		const inputValue = e.target.value;
-		if (e.target.classList.contains("multiselect__input")) {
-			if (
-				!inputValue.includes("~") &&
-				!inputValue.startsWith(" ") &&
-				!inputValue.includes("*") &&
-				inputValue.length > 0
-			) {
-				e.target.value = "~" + inputValue;
-				// console.log("Tilde inserted");
-			}
-			if (inputValue.startsWith("~") && inputValue.includes("*")) {
-				e.target.value = inputValue.slice(1);
-				// console.log("Tilde removed");
-			}
-		}
-	} catch (error) {
-		console.error("Error occurred in handleFuzzySearch:", error);
-	}
+    try {
+        const inputValue = e.target.value;
+        if (e.target.classList.contains("multiselect__input")) {
+            if (
+                !inputValue.includes("~") &&
+                !inputValue.startsWith(" ") &&
+                !inputValue.includes("*") &&
+                inputValue.length > 0
+            ) {
+                e.target.value = "~" + inputValue;
+                // console.log("Tilde inserted");
+            }
+            if (inputValue.startsWith("~") && inputValue.includes("*")) {
+                e.target.value = inputValue.slice(1);
+                // console.log("Tilde removed");
+            }
+        }
+    } catch (error) {
+        console.error("Error occurred in handleFuzzySearch:", error);
+    }
 }
 
 function fuzzySearchMain() {
-	try {
-		document.body.addEventListener("input", function (e) {
-			setTimeout(handleFuzzySearch, 10, e);
-		});
-	} catch (error) {
-		console.error("Error occurred in fuzzySearchMain:", error);
-	}
+    try {
+        document.body.addEventListener("input", function (e) {
+            setTimeout(handleFuzzySearch, 10, e);
+        });
+    } catch (error) {
+        console.error("Error occurred in fuzzySearchMain:", error);
+    }
 }
 
 /* 
 index.js
 */
-
-
-
-
-
-
 
 /* eslint-disable no-undef */
 fuzzySearchMain();
