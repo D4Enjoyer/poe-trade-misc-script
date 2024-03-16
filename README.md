@@ -1,4 +1,4 @@
-# poe-trade-misc-script
+# poe-trade-misc-script - [quick install](https://raw.githubusercontent.com/D4Enjoyer/poe-trade-misc-script/main/poe-trade-misc-script.user.js)
 
 This userscript adds small features that either enhance the trade website or change some default behaviours.
 
@@ -6,7 +6,7 @@ This userscript adds small features that either enhance the trade website or cha
 
 ### Any as default
 
-Changes the default "Sale Type" from "Buyout of Fixed Price" to "Any". It simulates the necessary user input when visiting the trade website or clearing a search.
+Changes the default "Sale Type" from "Buyout or Fixed Price" to "Any". It simulates the necessary user input when visiting the trade website or clearing a search.
 
 ### Exchange search clearer
 
@@ -14,7 +14,7 @@ After selecting an item on the Bulk Item Exchange, the search bar will be cleare
 
 ### Fuzzy search
 
-Inserts "~" to the search bar and stat filters on the trade website in order to enable fuzzy search. When using "*" as a wild-card in custom searches, fuzzy search will be automatically disabled. Starting a search with a space will disable it aswell.
+Inserts a tilde (~) to the search bar and stat filters on the trade website in order to enable fuzzy search. When using an asterisk (\*) as a wild-card in custom searches, fuzzy search will be automatically disabled. Starting a search with a space will disable it aswell.
 
 ### Open Exchange filters
 
