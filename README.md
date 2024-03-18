@@ -4,6 +4,10 @@ This userscript adds small features that either enhance the trade website or cha
 
 ## Features
 
+### Settings Menu
+
+The "Misc Settings" button located at the top left opens up the settings menu where you can select which features to enable. Make sure to refresh the page after changing any settings, they won't be appplied without. Settings are stored in local storage (misc-script-settings).
+
 ### Any as default
 
 Changes the default "Sale Type" from "Buyout or Fixed Price" to "Any". It simulates the necessary user input when visiting the trade website or clearing a search.
