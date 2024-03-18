@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         poe-trade-misc-script
 // @namespace    https://github.com/D4Enjoyer/poe-trade-misc-script
-// @version      1.0.0
+// @version      1.1.0
 // @description  This userscript adds small features that either enhance the trade website or change some default behaviours.
 // @author       D4Enjoyer
 // @match        https://www.pathofexile.com/trade*
@@ -126,50 +126,50 @@ exchange.search-clearer.js
 
 // Function to clear the search bar
 function clearSearchBar() {
-    try {
-        const searchBar = $(".search-select.form-control.text");
-        if (searchBar.length) {
-            searchBar.val("");
-            searchBar[0].dispatchEvent(new Event("input", { bubbles: true }));
-            // console.log("Search bar cleared.");
-        }
-    } catch (error) {
-        console.error("Error occurred while clearing searchbar:", error);
-    }
+	try {
+		const searchBar = $(".search-select.form-control.text");
+		if (searchBar.length) {
+			searchBar.val("");
+			searchBar[0].dispatchEvent(new Event("input", { bubbles: true }));
+			// console.log("Search bar cleared.");
+		}
+	} catch (error) {
+		console.error("Error occurred while clearing searchbar:", error);
+	}
 }
 
 // Function to check if the search bar contains text
 function shouldClearSearchBar() {
-    try {
-        var searchBar = $(".search-select.form-control.text");
-        var searchBarContainsText = searchBar.length && searchBar.val().trim() !== "";
-        // console.log("Search bar contains text:", searchBarContainsText);
-        return searchBarContainsText;
-    } catch (error) {
-        console.error("Error occurred while checking if the search bar contains text:", error);
-        return false;
-    }
+	try {
+		var searchBar = $(".search-select.form-control.text");
+		var searchBarContainsText = searchBar.length && searchBar.val().trim() !== "";
+		// console.log("Search bar contains text:", searchBarContainsText);
+		return searchBarContainsText;
+	} catch (error) {
+		console.error("Error occurred while checking if the search bar contains text:", error);
+		return false;
+	}
 }
 
 // Event handler for clicking on exchange items
 function handleExchangeItemClick(event) {
-    try {
-        if ($(event.target).closest(".exchange-filter-item").length && shouldClearSearchBar()) {
-            // console.log("Clicked on .exchange-filter-item");
-            clearSearchBar();
-        }
-    } catch (error) {
-        console.error("Error occurred in handleExchangeItemClick:", error);
-    }
+	try {
+		if ($(event.target).closest(".exchange-filter-item").length && shouldClearSearchBar()) {
+			// console.log("Clicked on .exchange-filter-item");
+			clearSearchBar();
+		}
+	} catch (error) {
+		console.error("Error occurred in handleExchangeItemClick:", error);
+	}
 }
 
 function exchangeSearchClearerMain() {
-    try {
-        $(".search-advanced-items.exchange").on("click", handleExchangeItemClick);
-        // console.log("Searchbar found, click event listeners added");
-    } catch (error) {
-        console.error("Error occurred in exchangeSearchClearerMain:", error);
-    }
+	try {
+		$(".search-advanced-items.exchange").on("click", handleExchangeItemClick);
+		// console.log("Searchbar found, click event listeners added");
+	} catch (error) {
+		console.error("Error occurred in exchangeSearchClearerMain:", error);
+	}
 }
 
 /* 
@@ -306,12 +306,369 @@ function fuzzySearchMain() {
 }
 
 /* 
+toast-message.js
+*/
+
+// Function to create and show a toast message
+//"success" and "error" as type
+function showToast(message, type) {
+    try {
+        const toast = document.createElement("div");
+        toast.classList.add("toast", `toast-${type}`);
+
+        const toastMessage = document.createElement("div");
+        toastMessage.classList.add("toast-message");
+        toastMessage.textContent = message;
+
+        toast.appendChild(toastMessage);
+
+        const toastContainer = document.querySelector(".toast-bottom-center");
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    } catch (error) {
+        console.error("Error in showToast:", error);
+    }
+}
+
+/*
+close-modal.js
+*/
+
+
+
+// Function to close Settings
+function closeSettings() {
+    try {
+        const overlay = document.querySelector(".overlay");
+        const modal = document.querySelector(".modal");
+
+        overlay.style.display = "none";
+        modal.style.display = "none";
+
+        overlay.parentNode.removeChild(overlay);
+        modal.parentNode.removeChild(modal);
+
+        showToast("Settings saved. Refresh to apply changes!", "success");
+    } catch (error) {
+        console.error("Error when trying to close settings:", error);
+    }
+}
+
+/*
+settings-utils.js
+*/
+
+// Function to save checkbox states to local storage
+function saveCheckboxStates(states) {
+    try {
+        localStorage.setItem("misc-script-settings", JSON.stringify(states));
+    } catch (error) {
+        console.error("Error in saveCheckboxStates:", error);
+    }
+}
+
+// Function to load checkbox states from local storage
+function loadCheckboxStates() {
+    try {
+        const storedStates = localStorage.getItem("misc-script-settings");
+        return storedStates ? JSON.parse(storedStates) : {};
+    } catch (error) {
+        console.error("Error in loadCheckboxStates:", error);
+    }
+}
+
+// Function to save a specific checkbox state to local storage
+function saveCheckboxState(checkboxId, isChecked) {
+    try {
+        const states = loadCheckboxStates();
+        states[checkboxId] = isChecked;
+        saveCheckboxStates(states);
+    } catch (error) {
+        console.error("Error in saveCheckboxState:", error);
+    }
+}
+
+// Function to load a specific checkbox state from local storage
+function loadCheckboxState(checkboxId) {
+    try {
+        const states = loadCheckboxStates();
+        return Object.prototype.hasOwnProperty.call(states, checkboxId) ? states[checkboxId] : false;
+    } catch (error) {
+        console.error("Error in loadCheckboxState:", error);
+    }
+}
+
+// Functions to check whether features are enbaled
+function isFuzzySearchEnabled() {
+    const state = loadCheckboxState("Fuzzy search");
+    return state === true;
+}
+
+function isOpenExchangeFiltersEnabled() {
+    const state = loadCheckboxState("Open Exchange filters");
+    return state === true;
+}
+
+function isExchangeSearchClearerEnabled() {
+    const state = loadCheckboxState("Exchange search clearer");
+    return state === true;
+}
+
+function isShowFiltersOnClearEnabled() {
+    const state = loadCheckboxState("Show filters on clear");
+    return state === true;
+}
+
+function isAnyAsDefaultEnabled() {
+    const state = loadCheckboxState("Any as Default");
+    return state === true;
+}
+
+/*
+open-modal.js
+*/
+
+
+
+
+// Function to open Settings
+function openSettings() {
+    // Overlay
+    const overlay = document.createElement("div");
+    overlay.className = "overlay";
+    overlay.addEventListener("click", closeSettings);
+
+    // Modal
+    const modal = document.createElement("div");
+    modal.className = "modal";
+
+    // Header
+    const modalHeader = document.createElement("h1");
+    modalHeader.className = "modal-header";
+    modalHeader.textContent = "Misc Script Settings";
+    modal.appendChild(modalHeader);
+
+    // Checkboxes
+    const checkboxes = [
+        "Any as Default",
+        "Exchange search clearer",
+        "Fuzzy search",
+        "Open Exchange filters",
+        "Show filters on clear",
+    ];
+    checkboxes.forEach((checkboxId) => {
+        const checkboxContainer = document.createElement("div");
+        checkboxContainer.className = "checkbox-container";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = checkboxId;
+        checkbox.className = "checkbox";
+        checkbox.checked = loadCheckboxState(checkboxId);
+        checkboxContainer.appendChild(checkbox);
+
+        const label = document.createElement("label");
+        label.htmlFor = checkboxId;
+        label.textContent = checkboxId;
+        label.className = "checkbox-label";
+        checkboxContainer.appendChild(label);
+
+        modal.appendChild(checkboxContainer);
+
+        checkbox.addEventListener("change", (event) => {
+            const isChecked = event.target.checked;
+            saveCheckboxState(checkboxId, isChecked);
+        });
+    });
+
+    // Reaload Info text
+    const reloadInfoContainer = document.createElement("div");
+    reloadInfoContainer.className = "reload-info-container";
+
+    const realoadInfo = document.createElement("span");
+    realoadInfo.textContent = "Refresh page to apply changes!";
+    reloadInfoContainer.appendChild(realoadInfo);
+
+    modal.appendChild(reloadInfoContainer);
+
+    // Footer
+    const modalFooter = document.createElement("h2");
+    modalFooter.className = "modal-footer";
+    modalFooter.textContent = "Close";
+    modal.appendChild(modalFooter);
+    modalFooter.addEventListener("click", closeSettings);
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(modal);
+
+    overlay.style.display = "block";
+    modal.style.display = "block";
+}
+
+/*
+menu-button.js
+*/
+
+
+
+function createMiscSettingsButton() {
+    try {
+        const button = document.createElement("button");
+        button.className = "settings-btn";
+        button.textContent = "Misc Settings";
+
+        const linkBackElement = document.querySelector(".linkBack");
+
+        if (linkBackElement) {
+            linkBackElement.appendChild(button);
+            button.addEventListener("click", openSettings);
+        }
+    } catch (error) {
+        console.error("Error creating the settings button:", error);
+    }
+}
+
+/* 
 index.js
 */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* eslint-disable no-undef */
-fuzzySearchMain();
-waitForKeyElements(".search-advanced-items.exchange", openExchangeFiltersMain);
-waitForKeyElements(".search-select.form-control.text", exchangeSearchClearerMain);
-waitForKeyElements(".search-bar", showFiltersOnClearMain);
-waitForKeyElements('.filter-title:contains("Sale Type")', anyAsDefaultMain);
+createMiscSettingsButton();
+
+if (isFuzzySearchEnabled()) {
+    fuzzySearchMain();
+}
+if (isOpenExchangeFiltersEnabled()) {
+    waitForKeyElements(".search-advanced-items.exchange", openExchangeFiltersMain);
+}
+if (isExchangeSearchClearerEnabled()) {
+    waitForKeyElements(".search-select.form-control.text", exchangeSearchClearerMain);
+}
+if (isShowFiltersOnClearEnabled()) {
+    waitForKeyElements(".search-bar", showFiltersOnClearMain);
+}
+if (isAnyAsDefaultEnabled()) {
+    waitForKeyElements('.filter-title:contains("Sale Type")', anyAsDefaultMain);
+}
+
+(function(){
+  const $style = document.createElement('style');
+
+  $style.innerHTML = `/* settings menu button */
+.settings-btn {
+    margin-left: 15px;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
+    /* color: #00b6ff; */
+}
+
+.settings-btn:hover {
+    color: #fff;
+    /* color: #00d2ff;  */
+}
+
+/* overlay */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+/* modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(206, 206, 206);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 15px;
+    background-color: rgb(177, 177, 177);
+    color: rgb(0, 0, 0);
+    text-align: center;
+    cursor: default;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 15px;
+    background-color: rgb(177, 177, 177);
+    color: rgb(0, 0, 0);
+    cursor: default;
+    text-align: center;
+}
+.modal-footer:hover {
+    background-color: rgb(190, 190, 190);
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 15px;
+    margin-right: 15px;
+    font-size: large;
+    color: rgb(0, 0, 0);
+    font-size: 23px;
+}
+
+.checkbox {
+    width: 25px;
+    height: 25px;
+    cursor: default;
+}
+
+.checkbox-label {
+    font-weight: normal;
+    margin-left: 10px;
+    cursor: default;
+}
+
+.reload-info-container {
+    color: rgb(0, 0, 0);
+    cursor: default;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+`;
+
+  if (document.readyState === 'complete' ||
+      document.readyState === 'interactive') {
+    document.body.appendChild($style);
+  } else {
+    window.addEventListener('DOMContentLoaded', () => {
+      document.body.appendChild($style);
+    });
+  }
+})();
