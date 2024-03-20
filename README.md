@@ -27,3 +27,7 @@ Opens filters (e.g. Fragments & Sets, Essences) when visiting the Bulk Item Exch
 ### Show filters on clear
 
 Clearing a search on the trade website shows the filters without having to manually click the "Show Filters" button.
+
+### Show Notes on filters
+
+Lets you put notes on filters, useful for e.g. searches with multiple weighted sums. Notes are stored in local storage, grouped by the tab's name, therefore best used in combination with a trade addon. Notes will only be saved if tab title is different from default.
