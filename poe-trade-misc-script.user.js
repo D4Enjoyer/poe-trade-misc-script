@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         poe-trade-misc-script
 // @namespace    https://github.com/D4Enjoyer/poe-trade-misc-script
-// @version      1.1.0
+// @version      1.2.0
 // @description  This userscript adds small features that either enhance the trade website or change some default behaviours.
 // @author       D4Enjoyer
 // @match        https://www.pathofexile.com/trade*
@@ -343,8 +343,8 @@ close-modal.js
 // Function to close Settings
 function closeSettings() {
     try {
-        const overlay = document.querySelector(".overlay");
-        const modal = document.querySelector(".modal");
+        const overlay = document.querySelector(".misc-settings-overlay");
+        const modal = document.querySelector(".misc-settings-modal");
 
         overlay.style.display = "none";
         modal.style.display = "none";
@@ -428,9 +428,150 @@ function isAnyAsDefaultEnabled() {
     return state === true;
 }
 
+function isShowNotesEnabled() {
+    const state = loadCheckboxState("Show Notes on filters");
+    return state === true;
+}
+
+/*
+close-notes.js
+*/
+
+// Function to close all notes menu
+function closeAllNotes() {
+    try {
+        const overlay = document.querySelector(".all-notes-overlay");
+        const modal = document.querySelector(".all-notes-modal");
+
+        overlay.style.display = "none";
+        modal.style.display = "none";
+
+        overlay.parentNode.removeChild(overlay);
+        modal.parentNode.removeChild(modal);
+    } catch (error) {
+        console.error("Error when trying to close settings:", error);
+    }
+}
+
+/*
+notes-menu.utils.js
+*/
+
+function loadAllNotesToModalContent(modalContent) {
+    try {
+        const savedNotes = JSON.parse(localStorage.getItem("saved-notes"));
+        if (!savedNotes) {
+            // No saved notes found
+            const noNotesMessage = document.createElement("p");
+            noNotesMessage.textContent = "No saved notes found.";
+            modalContent.appendChild(noNotesMessage);
+            return;
+        }
+
+        // Group notes by identifier
+        const notesByIdentifier = {};
+        Object.keys(savedNotes).forEach((identifier) => {
+            const notes = savedNotes[identifier];
+            notesByIdentifier[identifier] = notesByIdentifier[identifier] || [];
+            notesByIdentifier[identifier].push(...notes);
+        });
+
+        // Iterate over grouped notes and create sections for each identifier
+        Object.keys(notesByIdentifier).forEach((identifier) => {
+            const notes = notesByIdentifier[identifier];
+
+            // Create section container
+            const sectionContainer = document.createElement("div");
+
+            // Create section header for identifier
+            const sectionHeader = document.createElement("h3");
+            sectionHeader.className = "all-notes-section-header";
+            sectionHeader.textContent = `${identifier}`;
+            sectionContainer.appendChild(sectionHeader);
+
+            // Create delete button for identifier
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "X";
+            deleteButton.className = "delete-entry-button";
+            deleteButton.addEventListener("click", deleteEntry(savedNotes, identifier, sectionContainer));
+            sectionHeader.appendChild(deleteButton);
+
+            // Add notes to section container
+            notes.forEach(function (note, index) {
+                const noteElement = document.createElement("p");
+                noteElement.textContent = `${index + 1}: ${note}`;
+                sectionContainer.appendChild(noteElement);
+            });
+
+            // Add section container to modal content
+            modalContent.appendChild(sectionContainer);
+        });
+    } catch (error) {
+        console.log("Error in loadAllNotesToModalContent:", error);
+    }
+}
+
+// Function that deletes an entry from local storage
+function deleteEntry(savedNotes, identifier, sectionContainer) {
+    return function () {
+        delete savedNotes[identifier];
+        // Update local storage
+        localStorage.setItem("saved-notes", JSON.stringify(savedNotes));
+        // Remove section from modal content
+        sectionContainer.remove();
+    };
+}
+
+/*
+show-notes.js
+*/
+
+
+
+
+function openAllNotes() {
+    console.log("Show all notes button clicked");
+    // Overlay
+    const overlay = document.createElement("div");
+    overlay.className = "all-notes-overlay";
+    overlay.addEventListener("click", closeAllNotes);
+
+    // Modal
+    const modal = document.createElement("div");
+    modal.className = "all-notes-modal";
+
+    // Header
+    const modalHeader = document.createElement("h1");
+    modalHeader.className = "all-notes-header";
+    modalHeader.textContent = "Saved Notes";
+    modal.appendChild(modalHeader);
+
+    // Content
+    const modalContent = document.createElement("div");
+    modalContent.className = "all-notes-content";
+    modal.appendChild(modalContent);
+
+    // Load all saved notes and append them to modal content
+    loadAllNotesToModalContent(modalContent);
+
+    // Footer
+    const modalFooter = document.createElement("h2");
+    modalFooter.className = "all-notes-footer";
+    modalFooter.textContent = "Close";
+    modal.appendChild(modalFooter);
+    modalFooter.addEventListener("click", closeAllNotes);
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(modal);
+
+    overlay.style.display = "block";
+    modal.style.display = "block";
+}
+
 /*
 open-modal.js
 */
+
 
 
 
@@ -439,16 +580,16 @@ open-modal.js
 function openSettings() {
     // Overlay
     const overlay = document.createElement("div");
-    overlay.className = "overlay";
+    overlay.className = "misc-settings-overlay";
     overlay.addEventListener("click", closeSettings);
 
     // Modal
     const modal = document.createElement("div");
-    modal.className = "modal";
+    modal.className = "misc-settings-modal";
 
     // Header
     const modalHeader = document.createElement("h1");
-    modalHeader.className = "modal-header";
+    modalHeader.className = "misc-modal-header";
     modalHeader.textContent = "Misc Script Settings";
     modal.appendChild(modalHeader);
 
@@ -459,6 +600,7 @@ function openSettings() {
         "Fuzzy search",
         "Open Exchange filters",
         "Show filters on clear",
+        "Show Notes on filters",
     ];
     checkboxes.forEach((checkboxId) => {
         const checkboxContainer = document.createElement("div");
@@ -485,6 +627,14 @@ function openSettings() {
         });
     });
 
+    // Show Notes Button
+    const showNotesButton = document.createElement("button");
+    showNotesButton.className = "show-notes-button";
+    showNotesButton.textContent = "Show Notes";
+    showNotesButton.addEventListener("click", openAllNotes);
+
+    modal.appendChild(showNotesButton);
+
     // Reaload Info text
     const reloadInfoContainer = document.createElement("div");
     reloadInfoContainer.className = "reload-info-container";
@@ -497,7 +647,7 @@ function openSettings() {
 
     // Footer
     const modalFooter = document.createElement("h2");
-    modalFooter.className = "modal-footer";
+    modalFooter.className = "misc-modal-footer";
     modalFooter.textContent = "Close";
     modal.appendChild(modalFooter);
     modalFooter.addEventListener("click", closeSettings);
@@ -518,7 +668,7 @@ menu-button.js
 function createMiscSettingsButton() {
     try {
         const button = document.createElement("button");
-        button.className = "settings-btn";
+        button.className = "misc-settings-btn";
         button.textContent = "Misc Settings";
 
         const linkBackElement = document.querySelector(".linkBack");
@@ -532,9 +682,139 @@ function createMiscSettingsButton() {
     }
 }
 
+/*
+notes-save-load-utils
+*/
+
+
+
+// Function to get the tab title, which is used as group names in local storage
+function getTabTitle() {
+    try {
+        const identifier = $("head title").text();
+        const defaultTitle = "Trade - Path of Exile";
+
+        if (identifier !== defaultTitle) {
+            // console.log("Identifier:", identifier);
+            return identifier;
+        } else {
+            // console.log("Default title:", identifier);
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving tab title:", error);
+    }
+}
+
+// Function to save notes
+function saveNotes() {
+    try {
+        const identifier = getTabTitle();
+        if (!identifier) {
+            return;
+        }
+
+        const savedNotes = JSON.parse(localStorage.getItem("saved-notes")) || {};
+
+        // Initialize array for the current group in savedNotes
+        savedNotes[identifier] = savedNotes[identifier] || [];
+
+        // Iterate over all .note-input elements
+        $(".note-input").each(function (index) {
+            const inputText = $(this).val();
+            // Save input value in the array under the identifier key
+            savedNotes[identifier][index] = inputText;
+        });
+
+        // Remove empty notes after the last non-empty one
+        savedNotes[identifier] = removeEmptyNotes(savedNotes[identifier]);
+
+        // Save updated savedNotes object to local storage
+        localStorage.setItem("saved-notes", JSON.stringify(savedNotes));
+        showToast(`Notes saved for: ${identifier}`, "success");
+    } catch (error) {
+        console.log("Error in saveNotes:", error);
+    }
+}
+
+// Function to remove empty notes after the last non-empty one
+function removeEmptyNotes(notesArray) {
+    let lastIndex = notesArray.length - 1;
+    while (lastIndex >= 0 && notesArray[lastIndex] === "") {
+        lastIndex--;
+    }
+    return notesArray.slice(0, lastIndex + 1);
+}
+
+// Function to load notes
+function loadNotes() {
+    try {
+        const identifier = getTabTitle();
+        if (!identifier) {
+            return;
+        }
+
+        const savedNotes = JSON.parse(localStorage.getItem("saved-notes"));
+        if (!savedNotes || !savedNotes[identifier]) {
+            // console.log("No saved notes found for:", identifier);
+            return;
+        }
+
+        // Iterate over saved notes for the current identifier
+        const notes = savedNotes[identifier];
+        $(".note-input").each(function (index) {
+            // Check if the note index exists in the saved notes array
+            if (index < notes.length) {
+                $(this).val(notes[index]);
+            }
+        });
+        // console.log("Notes loaded successfully for:", identifier);
+    } catch (error) {
+        console.log("Error in loadNotes:", error);
+    }
+}
+
+/*
+show-notes-main.js
+*/
+
+
+
+
+function createNotesInput(editBtnElement) {
+    try {
+        const filterGroupHeader = $(editBtnElement).closest(".filter-group-header");
+
+        if (filterGroupHeader.length) {
+            const noteInputDiv = $('<div class="note-input-div"></div>');
+
+            const noteInput = $("<input>").addClass("note-input form-control text").css("text-align", "left");
+            noteInput.attr("placeholder", "Notes...");
+            noteInputDiv.append(noteInput);
+
+            filterGroupHeader.after(noteInputDiv);
+
+            // Attach change event handler to the specific input element
+            noteInput.on("change", function () {
+                // Call saveNotes only for the changed input
+                saveNotes($(this));
+            });
+        }
+    } catch (error) {
+        console.log("Error in createNotesInput:", error);
+    }
+}
+
+function showNotesOnFiltersMain(editBtnElement) {
+    createNotesInput(editBtnElement);
+    loadNotes();
+}
+
 /* 
 index.js
 */
+
+
 
 
 
@@ -567,25 +847,28 @@ if (isShowFiltersOnClearEnabled()) {
 if (isAnyAsDefaultEnabled()) {
     waitForKeyElements('.filter-title:contains("Sale Type")', anyAsDefaultMain);
 }
+if (isShowNotesEnabled()) {
+    waitForKeyElements(".edit-btn", showNotesOnFiltersMain);
+}
 
 (function(){
   const $style = document.createElement('style');
 
   $style.innerHTML = `/* settings menu button */
-.settings-btn {
+.misc-settings-btn {
     margin-left: 15px;
     background-color: rgba(0, 0, 0, 0);
     border-color: rgba(0, 0, 0, 0);
     /* color: #00b6ff; */
 }
 
-.settings-btn:hover {
+.misc-settings-btn:hover {
     color: #fff;
     /* color: #00d2ff;  */
 }
 
 /* overlay */
-.overlay {
+.misc-settings-overlay {
     display: none;
     position: fixed;
     top: 0;
@@ -593,11 +876,11 @@ if (isAnyAsDefaultEnabled()) {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+    z-index: 100;
 }
 
 /* modal */
-.modal {
+.misc-settings-modal {
     display: none;
     position: fixed;
     top: 50%;
@@ -606,11 +889,11 @@ if (isAnyAsDefaultEnabled()) {
     background-color: rgb(206, 206, 206);
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
+    z-index: 101;
 }
 
 /* Modal Header */
-.modal-header {
+.misc-modal-header {
     padding: 15px;
     background-color: rgb(177, 177, 177);
     color: rgb(0, 0, 0);
@@ -619,14 +902,14 @@ if (isAnyAsDefaultEnabled()) {
 }
 
 /* Modal Footer */
-.modal-footer {
+.misc-modal-footer {
     padding: 15px;
     background-color: rgb(177, 177, 177);
     color: rgb(0, 0, 0);
-    cursor: default;
+    cursor: pointer;
     text-align: center;
 }
-.modal-footer:hover {
+.misc-modal-footer:hover {
     background-color: rgb(190, 190, 190);
 }
 
@@ -660,6 +943,90 @@ if (isAnyAsDefaultEnabled()) {
     margin-top: 20px;
     margin-bottom: 20px;
     text-align: center;
+}
+
+/* Note Input */
+.note-input-div {
+    margin-left: 41px;
+    margin-right: 41px;
+    margin-bottom: 2px;
+}
+.note-input {
+    background-color: #1e2124;
+}
+
+.show-notes-button {
+    color: rgb(0, 0, 0);
+    margin-left: 30px;
+}
+
+/* All Notes Header */
+.all-notes-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 200;
+}
+
+/* All Notes Modal */
+.all-notes-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(206, 206, 206);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 201;
+}
+
+/* All Notes Header */
+.all-notes-header {
+    padding: 15px;
+    background-color: rgb(177, 177, 177);
+    color: rgb(0, 0, 0);
+    text-align: center;
+    cursor: default;
+}
+
+/* All Notes Footer */
+.all-notes-footer {
+    padding: 15px;
+    background-color: rgb(177, 177, 177);
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    text-align: center;
+}
+.all-notes-footer:hover {
+    background-color: rgb(190, 190, 190);
+}
+
+/* All Notes - saved notes */
+.all-notes-content {
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    color: rgb(0, 0, 0);
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 15px;
+}
+
+/* Delete entry button */
+.delete-entry-button {
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(0, 0, 0);
+    margin-left: 30px;
+}
+/* All Notes section header*/
+.all-notes-section-header {
+    color: rgb(0, 0, 0);
 }
 `;
 
